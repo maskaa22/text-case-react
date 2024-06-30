@@ -1,3 +1,4 @@
 .transactions {
   margin: 20px auto;
+  border-collapse: collapse;
 }

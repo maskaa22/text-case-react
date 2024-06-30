@@ -1,6 +1,3 @@
-.name-table-box {
-  width: 30%;
-}
-.table-container {
-  width: 70%;
+button:active {
+  outline: none;
 }

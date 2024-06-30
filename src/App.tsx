@@ -1,5 +1,6 @@
 import "./App.css";
 import Transaction from "./components/transactions/Transaction";
+import Nav from "./components/nav/Nav"
 import { QueryClient, QueryClientProvider } from "react-query";
 
 function App() {
@@ -7,10 +8,8 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex-between">
-        <div className="name-table-box">asx</div>
-        <div className="table-container"><Transaction /></div>
-      </div>
+      <Nav/>
+        <Transaction />
     </QueryClientProvider>
   );
 }

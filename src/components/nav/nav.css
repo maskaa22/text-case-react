@@ -1,0 +1,12 @@
+.header {
+  height: 55px;
+  border: 2px solid #bee3f8;
+  margin-bottom: 20px;
+}
+.nav {
+  display: flex;
+  justify-content: flex-end;
+}
+.login {
+  margin: 5px;
+}
