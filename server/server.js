@@ -119,6 +119,41 @@ app.get('/getAllTransactions', (req, res) => {
   });
 });
 
+//export data
+app.get('/getAllTransactionsForExport', (req, res) => {
+  const { sortBy, sortOrder, searchClientName, status, type } = req.query;
+
+  let query = `SELECT * FROM transactions`;
+
+  const queryParams = [];
+
+   if (status || type || searchClientName) {
+    query += ` WHERE 1`;
+    if(searchClientName) {
+      query += ` AND ClientName LIKE '%${searchClientName}%'`;
+    }
+  if(status) {
+    query+= ` AND Status = '${status}'`;
+  }
+  if(type) {
+    query+= ` AND Type = '${type}'`;
+  }
+  }
+ 
+  if(sortBy && sortOrder) {
+    query += ` ORDER BY ${sortBy} ${sortOrder}`;
+  }
+
+  db.all(query, queryParams, (err, rows) => {
+    if (err) {
+      console.error('Error fetching transactions:', err.message);
+      return res.status(500).json({ error: 'Error fetching transactions' });
+    }
+      res.json({ rows});
+
+  });
+});
+
 //edit status
 app.put('/editTransactionStatus/:id', (req, res) => {
   const { id } = req.params;
