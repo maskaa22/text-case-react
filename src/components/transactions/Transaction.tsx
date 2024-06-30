@@ -18,7 +18,7 @@ const Transaction = () => {
   const [selectedFilterType, setSelectedFilterType] = useState<string>("");
   const [transactionId, setTransactionId] = useState<number>(1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [flag, setFlag] = useState<string>('');
+  const [flag, setFlag] = useState<string>("");
 
   const itemsPerPage = 10;
 
@@ -37,6 +37,23 @@ const Transaction = () => {
     try {
       const { data } = await axios.get(
         `http://localhost:3000/getAllTransactions?page=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&searchClientName=${searchClientName}&status=${status}&type=${type}`
+      );
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAllTransactionsForExport = async (
+    sortBy: string,
+    sortOrder: string,
+    searchClientName: string,
+    status: string,
+    type: string
+  ) => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:3000/getAllTransactionsForExport?&sortBy=${sortBy}&sortOrder=${sortOrder}&searchClientName=${searchClientName}&status=${status}&type=${type}`
       );
       return data;
     } catch (error) {
@@ -147,6 +164,38 @@ const Transaction = () => {
     setIsOpen(false);
   };
 
+  //export data
+  const exportToCSV = async (
+    sortBy: string,
+    sortOrder: string,
+    searchClientName: string,
+    status: string,
+    type: string
+  ) => {
+    const response = await getAllTransactionsForExport(
+      sortBy,
+      sortOrder,
+      searchClientName,
+      status,
+      type
+    );
+
+    const csvData = Papa.unparse(response.rows);
+
+    const blob = new Blob([csvData], { type: "text/csv" });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "transactions.csv";
+    document.body.appendChild(link);
+    link.click();
+
+    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="container-data">
       <div className="flex-between">
@@ -173,16 +222,31 @@ const Transaction = () => {
           </Select>
         </div>
         <div>
-          
-          <Input type="file" id="fileInput" className="custom-file-input" accept=".csv"
-            onChange={(e) => handleFileDrop(e)}/>
-          <label htmlFor="fileInput" className="custom-file-label">IMPORT</label>
-          <Button colorScheme="teal" variant="outline">EXPORT</Button>
-         
-          {/* <input type="file" className="custom-file-input" accept=".csv"
-            />
-          <label htmlFor="fileInput" className="custom-file-label">EXPORT</label> */}
-       
+          <Input
+            type="file"
+            id="fileInput"
+            className="custom-file-input"
+            accept=".csv"
+            onChange={(e) => handleFileDrop(e)}
+          />
+          <label htmlFor="fileInput" className="custom-file-label">
+            IMPORT
+          </label>
+          <Button
+            colorScheme="teal"
+            variant="outline"
+            onClick={() =>
+              exportToCSV(
+                sortBy,
+                sortOrder,
+                searchClientName,
+                selectedFilterStatus,
+                selectedFilterType
+              )
+            }
+          >
+            EXPORT
+          </Button>
         </div>
       </div>
 
@@ -207,7 +271,12 @@ const Transaction = () => {
         </div>
       )}
 
-      <ModalWindow isOpen={isOpen} onClose={onClose} id={transactionId} flag={flag}/>
+      <ModalWindow
+        isOpen={isOpen}
+        onClose={onClose}
+        id={transactionId}
+        flag={flag}
+      />
     </div>
   );
 };
