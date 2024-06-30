@@ -6,3 +6,8 @@ export interface TransactionDate {
   ClientName: string;
   Amount: string;
 }
+export interface ModalInterface {
+  isOpen: boolean,
+  onClose: () => void,
+  id: number
+}

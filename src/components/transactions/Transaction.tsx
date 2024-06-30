@@ -3,6 +3,10 @@ import Papa from "papaparse";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { TransactionDate } from "../../interface";
 import axios from "axios";
+import ModalWindow from "./../modal/ModalWindow";
+import { Button, Input, Select } from "@chakra-ui/react";
+import TableComponent from "../table/TableComponent";
+import "./transaction.css";
 
 const Transaction = () => {
   const queryClient = useQueryClient();
@@ -12,6 +16,9 @@ const Transaction = () => {
   const [searchClientName, setSearchClientName] = useState<string>("");
   const [selectedFilterStatus, setSelectedFilterStatus] = useState<string>("");
   const [selectedFilterType, setSelectedFilterType] = useState<string>("");
+  const [transactionId, setTransactionId] = useState<number>(1);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [flag, setFlag] = useState<string>('');
 
   const itemsPerPage = 10;
 
@@ -24,7 +31,7 @@ const Transaction = () => {
     sortBy: string,
     sortOrder: string,
     searchClientName: string,
-    status: string, 
+    status: string,
     type: string
   ) => {
     try {
@@ -33,8 +40,8 @@ const Transaction = () => {
       );
       return data;
     } catch (error) {
-      console.log(error)
-    } 
+      console.log(error);
+    }
   };
 
   const mutation = useMutation(addTransaction, {
@@ -130,91 +137,78 @@ const Transaction = () => {
     setCurrentPage(1);
     queryClient.invalidateQueries("transactions");
   };
+  //edit status
+  const handleStatus = (id: number) => {
+    setTransactionId(id);
+    setIsOpen(true);
+  };
+  //close modal
+  const onClose = () => {
+    setIsOpen(false);
+  };
 
   return (
-    <>
-      <select
-        className="status"
-        value={selectedFilterStatus}
-        onChange={handleFilterChangeStatus}
-      >
-        <option value={""}>All</option>
-        <option value={"Pending"}>Pending</option>
-        <option value={"Completed"}>Completed</option>
-        <option value={"Cancelled"}>Cancelled</option>
-      </select>
+    <div className="container-data">
+      <div className="flex-between">
+        <div className="flex-inline">
+          <Select
+            className="status"
+            value={selectedFilterStatus}
+            onChange={handleFilterChangeStatus}
+          >
+            <option value={""}>All</option>
+            <option value={"Pending"}>Pending</option>
+            <option value={"Completed"}>Completed</option>
+            <option value={"Cancelled"}>Cancelled</option>
+          </Select>
 
-      <select
-        className="type"
-        value={selectedFilterType}
-        onChange={handleFilterChangeType}
-      >
-        <option value={""}>All</option>
-        <option value={"Refill"}>Refill</option>
-        <option value={"Withdrawal"}>Withdrawal</option>
-      </select>
+          <Select
+            className="type"
+            value={selectedFilterType}
+            onChange={handleFilterChangeType}
+          >
+            <option value={""}>All</option>
+            <option value={"Refill"}>Refill</option>
+            <option value={"Withdrawal"}>Withdrawal</option>
+          </Select>
+        </div>
+        <div>
+          
+          <Input type="file" id="fileInput" className="custom-file-input" accept=".csv"
+            onChange={(e) => handleFileDrop(e)}/>
+          <label htmlFor="fileInput" className="custom-file-label">IMPORT</label>
+          <Button colorScheme="teal" variant="outline">EXPORT</Button>
+         
+          {/* <input type="file" className="custom-file-input" accept=".csv"
+            />
+          <label htmlFor="fileInput" className="custom-file-label">EXPORT</label> */}
+       
+        </div>
+      </div>
 
-      <input type="file" accept=".csv" onChange={(e) => handleFileDrop(e)} />
       {transactions && transactions.length > 0 && (
         <div>
-          <input
+          <Input
             type="text"
             placeholder="search by name client"
             value={searchClientName}
             onChange={(e) => handlerSearchClientNameChange(e)}
           />
-         
-            <table>
-              <thead>
-                <tr>
-                  <th onClick={() => handleSort("TransactionId")}>
-                    Transaction Id
-                  </th>
-                  <th onClick={() => handleSort("Status")}>Status</th>
-                  <th onClick={() => handleSort("Type")}>Type</th>
-                  <th onClick={() => handleSort("ClientName")}>Client Name</th>
-                  <th onClick={() => handleSort("Amount")}>Amount</th>
-                  <th onClick={() => handleSort("Action")}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions?.map((transaction: TransactionDate) => (
-                  <tr key={transaction.TransactionId}>
-                    <td>{transaction.TransactionId}</td>
-                    <td>{transaction.Status}</td>
-                    <td>{transaction.Type}</td>
-                    <td>{transaction.ClientName}</td>
-                    <td>{transaction.Amount}</td>
-                    <td>
-                      <button>Edit</button>
-                      <button>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-          <div>
-            {Array.from(
-              { length: Math.ceil(data.totalCount / itemsPerPage) },
-              (_, index) => (
-                <button
-                  key={index + 1}
-                  onClick={() => handlerPageChange(index + 1)}
-                  style={{
-                    fontWeight: currentPage === index + 1 ? "bold" : "normal",
-                    border:
-                      currentPage === index + 1 ? "2px solid blue" : "none",
-                  }}
-                >
-                  {index + 1}
-                </button>
-              )
-            )}
-          </div>
+          <TableComponent
+            transactions={transactions}
+            data={data}
+            itemsPerPage={itemsPerPage}
+            handleStatus={handleStatus}
+            handlerPageChange={handlerPageChange}
+            currentPage={currentPage}
+            handleSort={handleSort}
+            setFlag={setFlag}
+          />
         </div>
       )}
-    </>
+
+      <ModalWindow isOpen={isOpen} onClose={onClose} id={transactionId} flag={flag}/>
+    </div>
   );
 };
 

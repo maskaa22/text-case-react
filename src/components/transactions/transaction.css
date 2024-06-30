@@ -1,0 +1,31 @@
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+}
+.flex-inline {
+  display: flex;
+}
+.status {
+  margin: 10px 0;
+}
+.type {
+  margin: 10px;
+}
+
+.custom-file-input {
+  display: none;
+}
+
+.custom-file-label {
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: #bee3f8;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.custom-file-label:hover {
+  background-color: #3182ce;
+}

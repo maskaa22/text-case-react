@@ -25,6 +25,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
+//import data in db
 app.post('/addTransaction', (req, res) => {
   
   const transactions = req.body;
@@ -65,6 +66,7 @@ app.post('/addTransaction', (req, res) => {
   });
 });
 
+//all transactions
 app.get('/getAllTransactions', (req, res) => {
   const { page, sortBy, sortOrder, searchClientName, status, type } = req.query;
   const itemsPerPage = 10;
@@ -114,6 +116,44 @@ app.get('/getAllTransactions', (req, res) => {
       const totalCount = row ? row.totalCount : 0;
       res.json({ transactions: rows, totalCount });
     });
+  });
+});
+
+//edit status
+app.put('/editTransactionStatus/:id', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!id || !status) {
+    return res.status(400).json({ error: 'TransactionId and status are required' });
+  }
+
+  const updateQuery = `UPDATE transactions SET Status = ? WHERE TransactionId = ?`;
+
+  db.run(updateQuery, [status, id], function (err) {
+    if (err) {
+      console.error('Error updating transaction status:', err.message);
+      return res.status(500).json({ error: 'Error updating transaction status' });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: `Transaction with TransactionId ${id} not found `});
+    }
+
+    res.json({ message: `Transaction ${id} status updated successfully `});
+   });
+});
+
+//delete transaction
+app.delete('/deleteTransaction/:id', (req, res) => {
+  const { id } = req.params;
+
+  db.run('DELETE FROM transactions WHERE TransactionId = ?', id, (err) => {
+    if (err) {
+      console.error('Error deleting transaction:', err.message);
+      return res.status(500).json({ error: 'Error deleting transaction' });
+    }
+    res.json({ message: 'Transaction deleted successfully' });
   });
 });
 
