@@ -19,13 +19,17 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "framer-motion": "^11.2.12",
+    "jsonwebtoken": "^9.0.2",
     "papaparse": "^5.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.52.0",
     "react-query": "^3.39.3",
+    "react-router-dom": "^6.24.0",
     "reflect-metadata": "^0.2.2",
     "sql.js": "^1.10.3",
     "sqlite3": "^5.1.7",
+    "styled-components": "^6.1.11",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {

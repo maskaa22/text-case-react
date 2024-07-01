@@ -6,16 +6,19 @@ export interface TransactionDate {
   ClientName: string;
   Amount: string;
 }
+
 export interface ModalInterface {
   isOpen: boolean,
   onClose: () => void,
   id: number,
   flag: string
 }
+
 export interface Data {
   totalCount: number,
   transactions: TransactionDate[]
 }
+
 export interface TableData {
   transactions: TransactionDate[],
   data: Data,
@@ -25,4 +28,9 @@ export interface TableData {
   currentPage: number,
   handleSort: (sort: string) => void,
   setFlag: (flag: string) => void,
+}
+
+export interface LoginFormProps {
+  username: string;
+  password: string;
 }

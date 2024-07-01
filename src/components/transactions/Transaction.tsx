@@ -4,9 +4,17 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { TransactionDate } from "../../interface";
 import axios from "axios";
 import ModalWindow from "./../modal/ModalWindow";
-import { Button, Input, Select, Checkbox, Spinner, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  Input,
+  Select,
+  Checkbox,
+  Spinner,
+  VStack,
+} from "@chakra-ui/react";
 import TableComponent from "../table/TableComponent";
 import "./transaction.css";
+import { useParams } from "react-router-dom";
 
 const Transaction = () => {
   const queryClient = useQueryClient();
@@ -20,6 +28,9 @@ const Transaction = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [flag, setFlag] = useState<string>("");
   const [selectedCheckboxes, setSelectedCheckboxes] = useState<string[]>([]);
+
+  const { token } = useParams<{ token: string }>();
+  const storedToken = localStorage.getItem("token");
 
   const itemsPerPage = 10;
 
@@ -94,24 +105,29 @@ const Transaction = () => {
   const transactions = data && data.transactions ? data.transactions : [];
 
   if (isLoading) {
-
-    return <div style={{position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'}}>
-      <Spinner
-        thickness='4px'
-        speed='0.65s'
-        emptyColor='gray.200'
-        color='blue.500'
-        size='xl'
-      />
-  </div>
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </div>
+    );
   }
   if (isError) {
     return <div>Error fetching transaction</div>;
@@ -120,8 +136,8 @@ const Transaction = () => {
   const handleFileDrop = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if(!file.name.endsWith('.csv')) {
-        alert('Please select a file with extension .csv');
+      if (!file.name.endsWith(".csv")) {
+        alert("Please select a file with extension .csv");
         return;
       }
       const reader = new FileReader();
@@ -205,7 +221,7 @@ const Transaction = () => {
     const columnsToExport = selectedCheckboxes;
 
     const csvData = Papa.unparse(response.rows, {
-      columns: columnsToExport
+      columns: columnsToExport,
     });
 
     const blob = new Blob([csvData], { type: "text/csv" });
@@ -226,111 +242,156 @@ const Transaction = () => {
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     const checkboxName = e.target.name;
-  
+
     if (isChecked) {
-      setSelectedCheckboxes(prev => [...prev, checkboxName]);
+      setSelectedCheckboxes((prev) => [...prev, checkboxName]);
     } else {
-      setSelectedCheckboxes(prev => prev.filter(item => item !== checkboxName));
+      setSelectedCheckboxes((prev) =>
+        prev.filter((item) => item !== checkboxName)
+      );
     }
   };
 
   return (
-    <div className="flex-between">
-      <div className="name-table-box">
-        <div className="checkbox-block">
-          <div className="label-block"><label className="label">Transactions
-            <span> (select columns in export)</span></label></div>
-          <VStack spacing={4} style={{alignItems: 'flex-start'}}>
-            <Checkbox style={{paddingTop: '20px', paddingLeft: '20px'}} name="TransactionId" onChange={handleCheckboxChange}>ID</Checkbox>
-            <Checkbox style={{paddingLeft: '20px'}} name="Status" onChange={handleCheckboxChange}>STATUS</Checkbox>
-            <Checkbox style={{paddingLeft: '20px'}} name="Type" onChange={handleCheckboxChange}>TYPE</Checkbox>
-            <Checkbox style={{paddingLeft: '20px'}} name="ClientName" onChange={handleCheckboxChange}>ClientName</Checkbox>
-            <Checkbox style={{paddingLeft: '20px', paddingBottom: '20px'}} name="Amount" onChange={handleCheckboxChange}>Amount</Checkbox>
-          </VStack>
-        </div>
-      </div>
-      <div className="table-container">
+    <>
+      {token === storedToken && (
         <div className="flex-between">
-          <div className="flex-inline">
-            <Select
-              className="status"
-              value={selectedFilterStatus}
-              onChange={handleFilterChangeStatus}
-            >
-              <option value={""}>All</option>
-              <option value={"Pending"}>Pending</option>
-              <option value={"Completed"}>Completed</option>
-              <option value={"Cancelled"}>Cancelled</option>
-            </Select>
-
-            <Select
-              className="type"
-              value={selectedFilterType}
-              onChange={handleFilterChangeType}
-            >
-              <option value={""}>All</option>
-              <option value={"Refill"}>Refill</option>
-              <option value={"Withdrawal"}>Withdrawal</option>
-            </Select>
+          <div className="name-table-box">
+            <div className="checkbox-block">
+              <div className="label-block">
+                <label className="label">
+                  Transactions
+                  <span> (select columns in export)</span>
+                </label>
+              </div>
+              <VStack spacing={4} style={{ alignItems: "flex-start" }}>
+                <Checkbox
+                  style={{ paddingTop: "20px", paddingLeft: "20px" }}
+                  name="TransactionId"
+                  onChange={handleCheckboxChange}
+                >
+                  ID
+                </Checkbox>
+                <Checkbox
+                  style={{ paddingLeft: "20px" }}
+                  name="Status"
+                  onChange={handleCheckboxChange}
+                >
+                  STATUS
+                </Checkbox>
+                <Checkbox
+                  style={{ paddingLeft: "20px" }}
+                  name="Type"
+                  onChange={handleCheckboxChange}
+                >
+                  TYPE
+                </Checkbox>
+                <Checkbox
+                  style={{ paddingLeft: "20px" }}
+                  name="ClientName"
+                  onChange={handleCheckboxChange}
+                >
+                  ClientName
+                </Checkbox>
+                <Checkbox
+                  style={{ paddingLeft: "20px", paddingBottom: "20px" }}
+                  name="Amount"
+                  onChange={handleCheckboxChange}
+                >
+                  Amount
+                </Checkbox>
+              </VStack>
+            </div>
           </div>
-          <div>
-          <Input
-              type="text"
-              placeholder="search by name client"
-              value={searchClientName}
-              onChange={(e) => handlerSearchClientNameChange(e)}
+          <div className="table-container">
+            <div className="flex-between">
+              <div className="flex-inline">
+                <Select
+                  className="status"
+                  value={selectedFilterStatus}
+                  onChange={handleFilterChangeStatus}
+                >
+                  <option value={""}>All</option>
+                  <option value={"Pending"}>Pending</option>
+                  <option value={"Completed"}>Completed</option>
+                  <option value={"Cancelled"}>Cancelled</option>
+                </Select>
+
+                <Select
+                  className="type"
+                  value={selectedFilterType}
+                  onChange={handleFilterChangeType}
+                >
+                  <option value={""}>All</option>
+                  <option value={"Refill"}>Refill</option>
+                  <option value={"Withdrawal"}>Withdrawal</option>
+                </Select>
+              </div>
+              <div>
+                {transactions && transactions.length > 0 && (
+                  <Input
+                    type="text"
+                    placeholder="search by name client"
+                    value={searchClientName}
+                    onChange={(e) => handlerSearchClientNameChange(e)}
+                  />
+                )}
+              </div>
+              <div>
+                <Input
+                  type="file"
+                  id="fileInput"
+                  className="custom-file-input"
+                  onChange={(e) => handleFileDrop(e)}
+                />
+                <label htmlFor="fileInput" className="custom-file-label">
+                  IMPORT
+                </label>
+
+                <Button
+                  colorScheme="teal"
+                  variant="outline"
+                  style={{ marginRight: "5px", marginBottom: "4px" }}
+                  onClick={() =>
+                    exportToCSV(
+                      sortBy,
+                      sortOrder,
+                      searchClientName,
+                      selectedFilterStatus,
+                      selectedFilterType
+                    )
+                  }
+                >
+                  EXPORT
+                </Button>
+              </div>
+            </div>
+
+            {transactions && transactions.length > 0 && (
+              <div>
+                <TableComponent
+                  transactions={transactions}
+                  data={data}
+                  itemsPerPage={itemsPerPage}
+                  handleStatus={handleStatus}
+                  handlerPageChange={handlerPageChange}
+                  currentPage={currentPage}
+                  handleSort={handleSort}
+                  setFlag={setFlag}
+                />
+              </div>
+            )}
+
+            <ModalWindow
+              isOpen={isOpen}
+              onClose={onClose}
+              id={transactionId}
+              flag={flag}
             />
-          </div>
-          <div>
-            {transactions && transactions.length > 0 && <Input
-              type="file"
-              id="fileInput"
-              className="custom-file-input"
-              onChange={(e) => handleFileDrop(e)}
-            />}
-            <label htmlFor="fileInput" className="custom-file-label">
-              IMPORT
-            </label>
-
-            <Button
-              colorScheme="teal"
-              variant="outline"
-              style={{marginRight: '5px', marginBottom: '4px'}}
-              onClick={() =>
-                exportToCSV(
-                  sortBy,
-                  sortOrder,
-                  searchClientName,
-                  selectedFilterStatus,
-                  selectedFilterType
-                )
-              }
-            >
-              EXPORT
-            </Button>
           </div>
         </div>
-
-        {transactions && transactions.length > 0 && (
-          <div>
-            
-            <TableComponent
-              transactions={transactions}
-              data={data}
-              itemsPerPage={itemsPerPage}
-              handleStatus={handleStatus}
-              handlerPageChange={handlerPageChange}
-              currentPage={currentPage}
-              handleSort={handleSort}
-              setFlag={setFlag}
-            />
-          </div>
-        )}
-
-        <ModalWindow isOpen={isOpen} onClose={onClose} id={transactionId} flag={flag}
-        />
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 
